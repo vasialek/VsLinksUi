@@ -1,0 +1,21 @@
+{
+  "name": "VsLinksUi",
+  "version": "0.5.4",
+  "manifest_version": 2,
+  "description": "Browser extension for VsLinks UI",
+  "homepage_url": "https://vslinks.herokuapp.com/",
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "browser_action": {
+    "default_icon": "images/icon19.png",
+    "default_popup": "src/popup.html"
+  },
+  "permissions": [
+    "clipboardRead",
+    "http://localhost:8079/",
+    "https://vslinks.herokuapp.com/"
+  ]
+}
