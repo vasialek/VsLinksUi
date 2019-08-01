@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script type="text/javascript" src="popup.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <style>
 	#Logs {
 		font-family: Courier New;
 		font-size: small;
 		color: darkgray;
-		width: 400px;
-		height: 150px;
+		width: 98%;
+		height: 9em;
+		margin-left: 0.5em;
 		border: solid 1px #bbb;
-		overflow: scroll;
+		overflow-y: scroll;
+		overflow-x: hidden;
+		/* position: absolute; */
+		/* top: 36em; */
+		white-space: pre-wrap;
 	}
   
 	.hidden {
@@ -18,6 +23,10 @@
 	}
 	.visible {
 		display: initial;
+	}
+
+	.btn-pad {
+		padding: 0em 0.5em 0.25em 0.5em;
 	}
 
 	.rate-0:before {
@@ -60,16 +69,24 @@
   </style>
 </head>
 <body>
-	<div class="container-fluid" style="min-width: 400px">
+	<div class="container-fluid" style="min-width: 48em; min-height: 40em;">
+		<div class="navbar navbar-expand-sm bg-dark navbar-dark sticky-top justify-content-between">
+			<ul class="navbar-nav justify-content-end">
+                <li class="nav-item">
+                    <a id="BtnShowCreate" class="nav-link fa fa-plus" href="#"> New</a>
+                </li>
+                <li class="nav-item">
+                    <a id="BtnRefresh" class="nav-link fa fa-refresh" href="#"> Refresh</a>
+                </li>
+            </ul>
+            <span id="Username" class="navbar-text mr-sm-2">???</span>
+        </div>
 		<div id="Msg">...</div>
-		<div class="row" id="Buttons">
-			<div class="btn-group">
-			<button class="btn btn-sm btn-info" id="BtnShowCreate">New</button>
-			<button class="btn btn-sm btn-secondary" id="BtnRefresh">Refresh</button>
-			</div>
-		</div>
 		<div class="row" id="List"></div>
 		<div class="row" id="New">
+			<div class="row">
+				<div class="col-10 mx-1 my-1"><h5>Create new link</h5></div>
+			</div>
 			<div class="form-group">
 				<select id="TypeId" class="custom-select custom-select-sm">
 					<option for="Title" value="0">Choose type</option>
@@ -98,21 +115,24 @@
 	</div>
 </body>
 
+<script type="text/javascript" src="popup.js"></script>
 <script id="template" type="x-tmpl-mustache">
 <table class="table table-bordered table-sm">
 	<tr>
 		<th>Title</th>
 		<th>URL</th>
-		<th>Rating</th>
-		<th> </th>
+		<th colspan="2">Actions</th>
 	</tr>
 {{#links}}
 	<tr>
 		<td>{{title}}</td>
-		<td><a href="{{url}}" target="_blank"><img src="../images/icon-youtube.png" /></td>
-		<td><span class="rate-{{rate}}"> </span></td>
-		<td>
-			<button type="button" class="btn btn-danger" data-uid="{{uid}}">x</button>
+		<td><a href="{{url}}" target="_blank"><i class="fa fa-globe"></i></td>
+		<td><i class="fa fa-question"> </i></td>
+		<td nowrap>
+			<a href="#" class="text-success" data-uid="{{uid}}"><i class="fa fa-thumbs-o-up"></i></a>
+			<a href="#" class="text-dark" data-uid="{{uid}}"><i class="fa fa-thumbs-o-down"></i></a>
+			<a href="#" class="text-danger" data-uid="{{uid}}"><i class="fa fa-trash"></i></a>
+			<a href="#" class="text-dark" data-uid="{{uid}}"><i class="fa fa-pencil"></i></a>
 		</td>
 	</tr>
 {{/links}}
