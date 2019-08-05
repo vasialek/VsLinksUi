@@ -1,8 +1,12 @@
 let pageNr = 1;
-var template = null;
-  
-var gBaseUrl = "https://vslink-dev.herokuapp.com/api/v1/";
-// var gBaseUrl = "http://localhost:8079/api/v1/";
+let gTemplateLinks = null;
+let gTemplateCategoryDropdown = null;
+
+// To debug in console
+let gXxx = null;
+
+// var gBaseUrl = "https://vslink-dev.herokuapp.com/api/v1/";
+var gBaseUrl = "http://localhost:8079/api/v1/";
 
 let gJwt = null;
 // Login information
@@ -25,12 +29,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function init() {
 	setMessage("Loading...", true, 0);
+	log("Working with API server " + gBaseUrl);
 
-	template = document.getElementById("template").innerHTML
-	Mustache.parse(template);   // optional, speeds up future uses
+	gTemplateLinks = document.getElementById("template").innerHTML
+	Mustache.parse(gTemplateLinks);   // optional, speeds up future uses
+
+	gTemplateCategoryDropdown = document.getElementById("TemplateCategoriesDropdown").innerHTML;
+	Mustache.parse(gTemplateCategoryDropdown);
 
 	document.getElementById("List").className = "hidden";
 	document.getElementById("New").className = "hidden";
+	document.getElementById("NewCategory").className = "hidden";
 	
 	document.getElementById("BtnShowCreate").addEventListener("click", function() {
 		document.getElementById("New").className = "visible";
@@ -42,6 +51,18 @@ function init() {
 	document.getElementById("BtnCreate").addEventListener("click", function () {
 		createLink();
 	});
+	
+	document.getElementById("BtnShowCreateCategory").addEventListener("click", function() {
+		document.getElementById("NewCategory").className = "form-inline visible";
+		document.getElementById("CategoryName").focus();
+    });
+    document.getElementById("BtnCancelCategory").addEventListener("click", function () {
+        cancelCreateCategory();
+    });
+	document.getElementById("BtnCreateCategory").addEventListener("click", function () {
+		createCategory();
+	});
+
 	document.getElementById("BtnRefresh").addEventListener("click", function () {
 		loadLinks();
 	});
@@ -49,7 +70,9 @@ function init() {
 
 function initUi() {
 	if (gUser.UserId !== "") {
-		
+		log("Successfully logged in as " + gUser.Nick);
+		setUserInfo(gUser);
+		loadLinkCategories();
 	}
 }
 
@@ -85,9 +108,7 @@ function doLogin(clientId, clientEmail, clientPassword) {
 				gUser.Nick = payload.name;
 				gUser.Email = payload.email;
 				gUser.UserId = payload.user_id;
-				log("Successfully logged in as " + gUser.Nick);
-				setUserInfo(gUser);
-				//loadLinks();
+				initUi();
 			}
 		} else {
 			gJwt = null;
@@ -157,6 +178,42 @@ function cancelCreate() {
     document.getElementById("CategoryId").value = "0";
 }
 
+function createCategory() {
+	let categoryName = document.getElementById("CategoryName").value;
+	log("Going to create category: " + categoryName);
+	if (isValidJwt(gJwt) == false) {
+		setMessage("You are not logged in, try to re-open extension", false, 30000);
+		return;
+	}
+
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", gBaseUrl + "category");
+	setAuthHeader(xhr, gJwt);
+	xhr.onload = function() {
+		log("Got response " + xhr.status + "(" + xhr.statusText + ") on Link Category create.");
+		if (xhr.status == 200) {
+			setMessage("Category is created.", true, 20000);
+		} else {
+			log("Got error from server saving category", "error");
+			setMessage("Got error from server saving category", false, 20000);
+		}
+	};
+	xhr.onerror = function() {
+		log("Could not save category on server!", "error");
+		setMessage("Could not save category on server!", false, 20000);
+	};
+
+	xhr.send(JSON.stringify({
+		name: categoryName
+	}));
+}
+
+function cancelCreateCategory() {
+    document.getElementById("NewCategory").className = "hidden";
+    document.getElementById("CategoryName").value = "";
+}
+
+
 function validateLink(link) {
 	if (link.url.length < 10) {
 		setMessage("Please enter URL of link", false, 30000);
@@ -197,22 +254,95 @@ function loadLinks() {
 }
 
 function displayLinks(links) {
-	let rendered = Mustache.render(template, {links: links});
+	let rendered = Mustache.render(gTemplateLinks, {links: links});
 	//log("Rendered links to HTML: " + rendered);
 	let o = document.getElementById("List");
 	o.innerHTML = rendered;
 	o.className = "visible";
 	
-	var deleteButtons = document.getElementsByClassName("btn btn-danger");
+	var deleteButtons = document.getElementsByClassName("vl-btn-delete");
+	var editButtons = document.getElementsByClassName("vl-btn-edit");
 	for (var i = 0; i < deleteButtons.length; i++) {
 		deleteButtons[i].addEventListener('click', function () {
 			deleteLink(this);
 		}, false);
 	}
+	for (var i = 0; i < editButtons.length; i++) {
+		editButtons[i].addEventListener('click', function () {
+			editLink(this);
+		}, false);
+	}
 
 }
 
+function loadLinkCategories() {
+	log("Going to load link categories...");
+	if (isValidJwt(gJwt) == false) {
+		setMessage("You are not logged in, try to re-open extension", false, 30000);
+		return;
+	}
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', gBaseUrl + 'category', true);
+	setAuthHeader(xhr, gJwt);
+	xhr.onload = function() {
+		log("Got response " + xhr.status + "(" + xhr.statusText + ") on loading link categories");
+		if (xhr.status == 200) {
+			let categories = JSON.parse(xhr.responseText);
+			displayLinkCategories(categories);
+		} else {
+			log("Got error from server loading link categories", "error");
+			setMessage("Got error from server loading link categories", false, 20000);
+		}
+	}
+	xhr.onerror = function() {
+		log("Could not load link categories from server!", "error");
+		setMessage("Could not load link categories from server!", false, 20000);
+	}
+
+	xhr.send();
+}
+
+function displayLinkCategories(categories) {
+	console.log(categories);
+	let rendered = Mustache.render(gTemplateCategoryDropdown, {categories: categories});
+	let o = document.getElementById("CategoryId");
+	o.innerHTML = rendered;
+}
+
 function deleteLink(sender) {
+	console.log("Going to delete message:");
+	if (isValidJwt(gJwt) == false) {
+		setMessage("You are not logged in, try to re-open extension", false, 30000);
+		return;
+	}
+
+	console.log(sender);
+	gXxx = sender;
+	let uid = getUidFromElement(sender);
+	log("Going to delete link with UID: " + uid);
+	
+	var xhr = new XMLHttpRequest();
+	xhr.open("DELETE", gBaseUrl + "links/" + uid);
+	setAuthHeader(xhr, gJwt);
+	xhr.onload = function() {
+		log("Got response " + xhr.status + " (" + xhr.statusText + ") from API server");
+		if (xhr.status == 200) {
+			deleteRowByButton(sender);
+		} else {
+			setMessage("Error deleting link from server. " + xhr.response, false, 60000);
+		}
+	};
+	xhr.onerror = function() {
+		log("Gto error response on deleting link", "ERROR");
+	};
+
+	xhr.send();
+}
+
+function editLink(sender) {
+	console.log("Going to edit message:");
+	console.log(sender);
 }
 
 function clearMessage() {
@@ -226,9 +356,7 @@ function setMessage(msg, isOk, ttlMs = 0) {
 	o.textContent = msg;
 	o.className = isOk ? "alert alert-success" : "alert alert-danger";
 	if (ttlMs > 0) {
-		setTimeout(function() {
-			o.className = "hidden";
-		}, ttlMs);
+		window.setTimeout(clearMessage, 60000);
 	}
 }
 
@@ -241,6 +369,14 @@ function log(msg, type = "INFO") {
 }
 
 // #region Helpers
+
+function deleteRowByButton(btn) {
+	btn.parentNode.parentNode.remove();
+}
+
+function getUidFromElement(el) {
+	return el.attributes["data-uid"].value;
+}
 
 function parseJwt (jwt) {
     var base64Url = jwt.split('.')[1];

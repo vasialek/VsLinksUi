@@ -76,8 +76,11 @@
                     <a id="BtnShowCreate" class="nav-link fa fa-plus" href="#"> New</a>
                 </li>
                 <li class="nav-item">
-                    <a id="BtnRefresh" class="nav-link fa fa-refresh" href="#"> Refresh</a>
+					<a id="BtnRefresh" class="nav-link fa fa-refresh" href="#"> Refresh</a>
                 </li>
+				<li class="nav-item">
+					<a id="BtnShowCreateCategory" class="nav-link fa fa-plus" href="#"> New category</a>
+				</li>
             </ul>
             <span id="Username" class="navbar-text mr-sm-2">???</span>
         </div>
@@ -88,11 +91,6 @@
 			</div>
 			<div class="form-group">
 				<select id="CategoryId" class="custom-select custom-select-sm">
-					<option for="Title" value="0">Choose type</option>
-					<option value="0331d284-3ba2-46a4-a9ca-4643bc0c48b0">Common</option>
-					<option value="7a51e051-972b-45ed-8128-048bbd563893">Nice girls</option>
-					<option value="5cfe6b89-0e22-41a0-b2cf-82b11898f63a">Rock music</option>
-					<option value="9024b930-91b1-4b0a-aa6f-6cffc2761556">Programming</option>
 				</select>
 			</div> 
 			<div class="form-group">
@@ -108,6 +106,15 @@
 				</div>
 			</div>
 		</div>
+
+		<div class="form-inline my-1" id="NewCategory">
+			<input id="CategoryName" type="text" class="form-control mb-2 mr-sm-2" placeholder="Category name">
+			<div class="btn-group">
+				<button id="BtnCreateCategory" class="btn btn-primary mb-2">Save</button>
+				<button id="BtnCancelCategory" class="btn btn-danger mb-2">Cancel</button>
+			</div>
+		</div>
+
 		<div class="row my-2" id="List"></div>
         <div class="row my-1">
 		    <div id="Logs"></div>
@@ -129,17 +136,22 @@
 		<td><a href="{{url}}" target="_blank"><i class="fa fa-globe"></i></td>
 		<td><i class="fa fa-question"> </i></td>
 		<td nowrap>
-			<a href="#" class="text-success" data-uid="{{uid}}"><i class="fa fa-thumbs-o-up"></i></a>
-			<a href="#" class="text-dark" data-uid="{{uid}}"><i class="fa fa-thumbs-o-down"></i></a>
-			<a href="#" class="text-danger" data-uid="{{uid}}"><i class="fa fa-trash"></i></a>
-			<a href="#" class="text-dark" data-uid="{{uid}}"><i class="fa fa-pencil"></i></a>
+			<a href="#" class="text-success" data-uid="{{link_id}}"><i class="fa fa-thumbs-o-up"></i></a>
+			<a href="#" class="text-dark" data-uid="{{link_id}}"><i class="fa fa-thumbs-o-down"></i></a>
+			<a href="#" class="vl-btn-delete text-danger" data-uid="{{link_id}}"><i class="fa fa-trash"></i></a>
+			<a href="#" class="vl-btn-edit text-dark" data-uid="{{link_id}}"><i class="fa fa-pencil"></i></a>
 		</td>
 	</tr>
 {{/links}}
 </table>
 </script>
 
-
+<script id="TemplateCategoriesDropdown" type="x-tmpl-mustache">
+	<option for="Title" value="0">Choose type</option>
+	{{#categories}}
+		<option value="{{link_category_id}}">{{name}}</option>
+	{{/categories}}
+</script>
 
 
 <style>
