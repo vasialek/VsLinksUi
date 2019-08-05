@@ -1,15 +1,14 @@
 let pageNr = 1;
 var template = null;
   
-// var gBaseUrl = "https://visma-links.herokuapp.com/";
-var gBaseUrl = "http://localhost:8079/api/v1/";
+var gBaseUrl = "https://vslink-dev.herokuapp.com/api/v1/";
+// var gBaseUrl = "http://localhost:8079/api/v1/";
 
 let gJwt = null;
 // Login information
 let gClientId = "xCWZP3MzZcJawrHTysBk8catMctPK3Fr";
 let gClientEmail = "proglamer@gmail.com";
 let gClientPassword = "xEHdaERHMev2";
-// let gClientPassword = "rven$nsu%YW#3bxzdVVFpMVDqbkx!Cy9m~hsT5bXqSwP!B3!8RCxmwRP9%SqDWk";
 
 let gUser = {
 	Nick: "",
@@ -35,6 +34,7 @@ function init() {
 	
 	document.getElementById("BtnShowCreate").addEventListener("click", function() {
 		document.getElementById("New").className = "visible";
+		document.getElementById("Title").focus();
     });
     document.getElementById("BtnCancel").addEventListener("click", function () {
         cancelCreate();
@@ -73,22 +73,24 @@ function doLogin(clientId, clientEmail, clientPassword) {
 	let rq = new XMLHttpRequest();
 	rq.open("POST", gBaseUrl + "auth", true);
 	rq.onload = function() {
+		log("Got response " + rq.status + " (" + rq.statusText + ") from server...");
 		if (rq.status == 200) {
-			log("Got 200 response from server...");
 			var resp = JSON.parse(rq.responseText);
 			// console.log(resp);
 			if (resp.status === true) {
-				log("Successfully logged in. " + resp.jwt);
 				setMessage("Successfully logged in", true, 10000);
-				let payload = parseJwt(resp.jwt);
+				gJwt = resp.jwt;
+				let payload = parseJwt(gJwt);
 				console.log(payload);
 				gUser.Nick = payload.name;
 				gUser.Email = payload.email;
 				gUser.UserId = payload.user_id;
-				//gJwt = payload;
+				log("Successfully logged in as " + gUser.Nick);
+				setUserInfo(gUser);
 				//loadLinks();
 			}
 		} else {
+			gJwt = null;
 			setMessage("Can't log you in, sorry!", false, 20000);
 		}
 	}
@@ -106,10 +108,18 @@ function doLogin(clientId, clientEmail, clientPassword) {
 	rq.send(JSON.stringify(lm));
 }
 
+function setUserInfo(user) {
+	document.getElementById("Username").innerHTML = user.Nick;
+}
+
 function createLink() {
 	log("Going to send link to create...");
+	if (isValidJwt(gJwt) == false) {
+		setMessage("You are not logged in, try to re-open extension", false, 30000);
+		return;
+	}
 	let link = {
-		typeId: document.getElementById("TypeId").value,
+		link_category_id: document.getElementById("CategoryId").value,
 		title: document.getElementById("Title").value,
 		url: document.getElementById("Url").value
 	}
@@ -120,6 +130,7 @@ function createLink() {
 
 	var rq = new XMLHttpRequest();
 	rq.open('POST', gBaseUrl + 'links', true);
+	setAuthHeader(rq, gJwt);
 	rq.onload = function() {
 		if (rq.status == 200) {
 			setMessage("Link is created", true, 2000);
@@ -143,7 +154,7 @@ function cancelCreate() {
     document.getElementById("New").className = "hidden";
     document.getElementById("Title").value = "";
     document.getElementById("Url").value = "";
-    document.getElementById("TypeId").value = "0";
+    document.getElementById("CategoryId").value = "0";
 }
 
 function validateLink(link) {
@@ -156,9 +167,15 @@ function validateLink(link) {
 }
 
 function loadLinks() {
-    log("Going to load links...");
+	log("Going to load links...");
+	if (isValidJwt(gJwt) == false) {
+		setMessage("You are not logged in, try to re-open extension", false, 30000);
+		return;
+	}
+
 	var rq = new XMLHttpRequest();
 	rq.open('GET', gBaseUrl + 'links', true);
+	setAuthHeader(rq, gJwt);
 	rq.onload = function() {
 		if (rq.status == 200) {
 			setMessage("Links are loaded", true, 2000);
@@ -234,6 +251,14 @@ function parseJwt (jwt) {
 
     return JSON.parse(payload);
 };
+
+function setAuthHeader(xhr, jwt) {
+	if (xhr != null) {
+		let h = "Bearer " + jwt;
+		console.log("Set Authorization header to: " + h);
+		xhr.setRequestHeader("Authorization", h);
+	}
+}
 
 // #endregion
 
