@@ -1,6 +1,7 @@
 let pageNr = 1;
 let gTemplateLinks = null;
 let gTemplateCategoryDropdown = null;
+let gTemplateFilterCategories = null;
 
 // To debug in console
 let gXxx = null;
@@ -36,6 +37,9 @@ function init() {
 
 	gTemplateCategoryDropdown = document.getElementById("TemplateCategoriesDropdown").innerHTML;
 	Mustache.parse(gTemplateCategoryDropdown);
+
+	gTemplateFilterCategories = document.getElementById("TemplateFilterCategories").innerHTML;
+	Mustache.parse(gTemplateFilterCategories);
 
 	document.getElementById("List").className = "hidden";
 	document.getElementById("New").className = "hidden";
@@ -290,6 +294,7 @@ function loadLinkCategories() {
 		if (xhr.status == 200) {
 			let categories = JSON.parse(xhr.responseText);
 			displayLinkCategories(categories);
+			displayFilterCategories(categories);
 		} else {
 			log("Got error from server loading link categories", "error");
 			setMessage("Got error from server loading link categories", false, 20000);
@@ -308,6 +313,11 @@ function displayLinkCategories(categories) {
 	let rendered = Mustache.render(gTemplateCategoryDropdown, {categories: categories});
 	let o = document.getElementById("CategoryId");
 	o.innerHTML = rendered;
+}
+
+function displayFilterCategories(categories) {
+	let rendered = Mustache.render(gTemplateFilterCategories, {categories: categories});
+	document.getElementById("FilterCategory").innerHTML = rendered;
 }
 
 function deleteLink(sender) {
