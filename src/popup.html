@@ -131,12 +131,14 @@
 <script id="template" type="x-tmpl-mustache">
 <table class="table table-bordered table-sm">
 	<tr>
+		<th></th>
 		<th>Title</th>
 		<th>URL</th>
 		<th colspan="2">Actions</th>
 	</tr>
 {{#links}}
 	<tr>
+		<td align="center"><i class="{{iconClass}} text-warning"></i></td>
 		<td>{{title}}</td>
 		<td><a href="{{url}}" target="_blank"><i class="fa fa-globe"></i></td>
 		<td><i class="fa fa-question"> </i></td>
@@ -161,7 +163,7 @@
 <script id="TemplateFilterCategories" type="x-tmpl-mustache">
 	{{#categories}}
 		<li class="nav-item">
-			<a href="#" data-uid="{{link_category_id}}" class="nav-link {{icon_class}} text-warning" title="{{name}}"></a>
+			<a href="#" data-uid="{{link_category_id}}" class="vl-filter nav-link {{icon_class}} text-warning" title="{{name}}"></a>
 		</li>
 	{{/categories}}
 </script>

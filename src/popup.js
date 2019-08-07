@@ -6,8 +6,12 @@ let gTemplateFilterCategories = null;
 // To debug in console
 let gXxx = null;
 
-// var gBaseUrl = "https://vslink-dev.herokuapp.com/api/v1/";
-var gBaseUrl = "http://localhost:8079/api/v1/";
+// Links and Categories from DB
+let gLinks = [];
+let gCategories = [];
+
+var gBaseUrl = "https://vslink-dev.herokuapp.com/api/v1/";
+// var gBaseUrl = "http://localhost:8079/api/v1/";
 
 let gJwt = null;
 // Login information
@@ -240,9 +244,8 @@ function loadLinks() {
 	rq.onload = function() {
 		if (rq.status == 200) {
 			setMessage("Links are loaded", true, 2000);
-			//log(rq.responseText);
-			var resp = JSON.parse(rq.responseText);
-			displayLinks(resp);
+			gLinks = JSON.parse(rq.responseText);
+			displayLinks(gLinks);
 			
 		} else {
 			log("Got error from server loading links", "error");
@@ -258,8 +261,11 @@ function loadLinks() {
 }
 
 function displayLinks(links) {
-	let rendered = Mustache.render(gTemplateLinks, {links: links});
-	//log("Rendered links to HTML: " + rendered);
+	let rendered = Mustache.render(gTemplateLinks, {links: links, "iconClass": function () {
+		const category = getLinkCategoryById(this.link_category_id);
+		return category.icon_class == "" ? "fa fa-link" : category.icon_class;
+	}});
+
 	let o = document.getElementById("List");
 	o.innerHTML = rendered;
 	o.className = "visible";
@@ -292,9 +298,9 @@ function loadLinkCategories() {
 	xhr.onload = function() {
 		log("Got response " + xhr.status + "(" + xhr.statusText + ") on loading link categories");
 		if (xhr.status == 200) {
-			let categories = JSON.parse(xhr.responseText);
-			displayLinkCategories(categories);
-			displayFilterCategories(categories);
+			gCategories = JSON.parse(xhr.responseText);
+			displayLinkCategories(gCategories);
+			displayFilterCategories(gCategories);
 		} else {
 			log("Got error from server loading link categories", "error");
 			setMessage("Got error from server loading link categories", false, 20000);
@@ -309,7 +315,6 @@ function loadLinkCategories() {
 }
 
 function displayLinkCategories(categories) {
-	console.log(categories);
 	let rendered = Mustache.render(gTemplateCategoryDropdown, {categories: categories});
 	let o = document.getElementById("CategoryId");
 	o.innerHTML = rendered;
@@ -318,6 +323,47 @@ function displayLinkCategories(categories) {
 function displayFilterCategories(categories) {
 	let rendered = Mustache.render(gTemplateFilterCategories, {categories: categories});
 	document.getElementById("FilterCategory").innerHTML = rendered;
+
+	// Apply filtering to icons
+	initFilterActions();
+}
+
+function initFilterActions() {
+	let icons = document.getElementsByClassName("vl-filter");
+	log("Initializing filter " + icons.length + " icons");
+	for (let i = 0; icons != null && i < icons.length; i++) {
+		const icon = icons[i];
+		icon.addEventListener("click", function () {
+			onFilterCategoryClicked(icon);
+		});
+	}
+}
+
+function onFilterCategoryClicked(element) {
+	let uid = getUidFromElement(element);
+	filterLinksByCategory(uid);
+}
+
+function filterLinksByCategory(categoryId) {
+	const category = getLinkCategoryById(categoryId);
+	if (category == null) {
+		setMessage("Incorrect category to filter.", false, 10000);
+		return;
+	}
+
+	if (gLinks.length == 0) {
+		loadLinks();
+	}
+
+	let filtered = [];
+	setMessage(`Filtering by ${category.name}`, true, 1000);
+	for (let i = 0; i < gLinks.length; i++) {
+		if (gLinks[i].link_category_id == categoryId) {
+			filtered.push(gLinks[i]);
+		}
+	}
+
+	displayLinks(filtered);
 }
 
 function deleteLink(sender) {
@@ -379,6 +425,16 @@ function log(msg, type = "INFO") {
 }
 
 // #region Helpers
+
+function getLinkCategoryById(categoryId) {
+	for (let i = 0; i < gCategories.length; i++) {
+		const category = gCategories[i];
+		if (category.link_category_id == categoryId) {
+			return category;
+		}
+	}
+	return {};
+}
 
 function deleteRowByButton(btn) {
 	btn.parentNode.parentNode.remove();
