@@ -97,44 +97,18 @@ function isValidJwt(jwt) {
 function loginTo() {
 	gJwt = null;
 	setMessage("Trying to login...", true, 500);
-	doLogin(gClientId, gClientEmail, gClientPassword);
-}
-
-function doLogin(clientId, clientEmail, clientPassword) {
-	let rq = new XMLHttpRequest();
-	rq.open("POST", gBaseUrl + "auth", true);
-	rq.onload = function() {
-		log("Got response " + rq.status + " (" + rq.statusText + ") from server...");
-		if (rq.status == 200) {
-			var resp = JSON.parse(rq.responseText);
-			// console.log(resp);
-			if (resp.status === true) {
-				setMessage("Successfully logged in", true, 10000);
-				gJwt = resp.jwt;
-				let payload = parseJwt(gJwt);
-				console.log(payload);
-				gUser.Nick = payload.name;
-				gUser.Email = payload.email;
-				gUser.UserId = payload.user_id;
-				initUi();
-			}
-		} else {
+	Repository.login({
+		ClientId: gClientId, 
+		Email: gClientEmail, 
+		Password: gClientPassword}, function (user) {
+			setMessage("Logged in", true, 10000);
+			gJwt = user.Jwt;
+			gUser = user;
+			initUi();
+		}, function (errors) {
+			setMessage("Error logging in.", false, 30000);
 			gJwt = null;
-			setMessage("Can't log you in, sorry!", false, 20000);
-		}
-	}
-	rq.onerror = function() {
-		log("Could not login to server!", "error");
-		setMessage("Could not login to server!", false, 20000);
-	}
-
-	let lm = {
-		client_id: clientId,
-		email: clientEmail,
-		password: clientPassword,
-	};
-	log("Sending: " + JSON.stringify(lm));
-	rq.send(JSON.stringify(lm));
+		});
 }
 
 function setUserInfo(user) {
