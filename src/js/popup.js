@@ -90,10 +90,6 @@ function validateJwt() {
 	}
 }
 
-function isValidJwt(jwt) {
-	return jwt != null && jwt.length > 32;
-}
-
 function loginTo() {
 	gJwt = null;
 	setMessage("Trying to login...", true, 500);
@@ -117,7 +113,7 @@ function setUserInfo(user) {
 
 function createLink() {
 	log("Going to send link to create...");
-	if (isValidJwt(gJwt) == false) {
+	if (JwtHelper.isValid(gJwt) == false) {
 		setMessage("You are not logged in, try to re-open extension", false, 30000);
 		return;
 	}
@@ -163,7 +159,7 @@ function cancelCreate() {
 function createCategory() {
 	let categoryName = document.getElementById("CategoryName").value;
 	log("Going to create category: " + categoryName);
-	if (isValidJwt(gJwt) == false) {
+	if (JwtHelper.isValid(gJwt) == false) {
 		setMessage("You are not logged in, try to re-open extension", false, 30000);
 		return;
 	}
@@ -207,7 +203,7 @@ function validateLink(link) {
 
 function loadLinks() {
 	log("Going to load links...");
-	if (isValidJwt(gJwt) == false) {
+	if (JwtHelper.isValid(gJwt) == false) {
 		setMessage("You are not logged in, try to re-open extension", false, 30000);
 		return;
 	}
@@ -261,7 +257,7 @@ function displayLinks(links) {
 
 function loadLinkCategories() {
 	log("Going to load link categories...");
-	if (isValidJwt(gJwt) == false) {
+	if (JwtHelper.isValid(gJwt) == false) {
 		setMessage("You are not logged in, try to re-open extension", false, 30000);
 		return;
 	}
@@ -342,7 +338,7 @@ function filterLinksByCategory(categoryId) {
 
 function deleteLink(sender) {
 	console.log("Going to delete message:");
-	if (isValidJwt(gJwt) == false) {
+	if (JwtHelper.isValid(gJwt) == false) {
 		setMessage("You are not logged in, try to re-open extension", false, 30000);
 		return;
 	}
