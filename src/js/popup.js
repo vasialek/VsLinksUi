@@ -86,7 +86,7 @@ function initUi() {
 
 function validateJwt() {
 	if (gJwt == null) {
-		gJwt = loginTo();
+		loginTo();
 	}
 }
 
@@ -100,6 +100,7 @@ function loginTo() {
 			setMessage("Logged in", true, 10000);
 			gJwt = user.Jwt;
 			gUser = user;
+			log("JWT: " + gJwt);
 			initUi();
 		}, function (errors) {
 			setMessage("Error logging in.", false, 30000);
@@ -203,31 +204,40 @@ function validateLink(link) {
 
 function loadLinks() {
 	log("Going to load links...");
-	if (JwtHelper.isValid(gJwt) == false) {
-		setMessage("You are not logged in, try to re-open extension", false, 30000);
-		return;
-	}
+	log("JWT: " + gJwt);
+	Repository.loadLinks(gJwt, function(links) {
+		gLinks = links;
+		displayLinks(gLinks);
+	}, function(errors) {
+		log("Got error from server loading links", "error");
+		console.log(errors);
+		setMessage("Got error from server loading links", false, 20000);
+	});
+	// if (JwtHelper.isValid(gJwt) == false) {
+	// 	setMessage("You are not logged in, try to re-open extension", false, 30000);
+	// 	return;
+	// }
 
-	var rq = new XMLHttpRequest();
-	rq.open('GET', gBaseUrl + 'links', true);
-	setAuthHeader(rq, gJwt);
-	rq.onload = function() {
-		if (rq.status == 200) {
-			setMessage("Links are loaded", true, 2000);
-			gLinks = JSON.parse(rq.responseText);
-			displayLinks(gLinks);
+	// var rq = new XMLHttpRequest();
+	// rq.open('GET', gBaseUrl + 'links', true);
+	// setAuthHeader(rq, gJwt);
+	// rq.onload = function() {
+	// 	if (rq.status == 200) {
+	// 		setMessage("Links are loaded", true, 2000);
+	// 		gLinks = JSON.parse(rq.responseText);
+	// 		displayLinks(gLinks);
 			
-		} else {
-			log("Got error from server loading links", "error");
-			setMessage("Got error from server loading links", false, 20000);
-		}
-	};
-	rq.onerror = function() {
-		log("Could not load links from server!", "error");
-		setMessage("Could not load links from server!", false, 20000);
-	};
+	// 	} else {
+	// 		log("Got error from server loading links", "error");
+	// 		setMessage("Got error from server loading links", false, 20000);
+	// 	}
+	// };
+	// rq.onerror = function() {
+	// 	log("Could not load links from server!", "error");
+	// 	setMessage("Could not load links from server!", false, 20000);
+	// };
 	
-	rq.send();
+	// rq.send();
 }
 
 function displayLinks(links) {
@@ -257,32 +267,45 @@ function displayLinks(links) {
 
 function loadLinkCategories() {
 	log("Going to load link categories...");
-	if (JwtHelper.isValid(gJwt) == false) {
-		setMessage("You are not logged in, try to re-open extension", false, 30000);
-		return;
-	}
-
-	var xhr = new XMLHttpRequest();
-	xhr.open('GET', gBaseUrl + 'category', true);
-	setAuthHeader(xhr, gJwt);
-	xhr.onload = function() {
-		log("Got response " + xhr.status + "(" + xhr.statusText + ") on loading link categories");
-		if (xhr.status == 200) {
-			gCategories = JSON.parse(xhr.responseText);
-			displayLinkCategories(gCategories);
-			displayFilterCategories(gCategories);
-		} else {
-			log("Got error from server loading link categories", "error");
-			setMessage("Got error from server loading link categories", false, 20000);
-		}
-	}
-	xhr.onerror = function() {
-		log("Could not load link categories from server!", "error");
-		setMessage("Could not load link categories from server!", false, 20000);
-	}
-
-	xhr.send();
+	Repository.loadCategories(gJwt, function (categories) {
+		log("Got link categories from server...");
+		console.log(categories);
+		gCategories = categories;
+		displayLinkCategories(gCategories);
+		displayFilterCategories(gCategories);
+	}, function (errors) {
+		setMessage("Got error from server loading link categories", false, 20000);
+	});
 }
+
+// function loadLinkCategories() {
+// 	log("Going to load link categories...");
+// 	if (JwtHelper.isValid(gJwt) == false) {
+// 		setMessage("You are not logged in, try to re-open extension", false, 30000);
+// 		return;
+// 	}
+
+// 	var xhr = new XMLHttpRequest();
+// 	xhr.open('GET', gBaseUrl + 'category', true);
+// 	setAuthHeader(xhr, gJwt);
+// 	xhr.onload = function() {
+// 		log("Got response " + xhr.status + "(" + xhr.statusText + ") on loading link categories");
+// 		if (xhr.status == 200) {
+// 			gCategories = JSON.parse(xhr.responseText);
+// 			displayLinkCategories(gCategories);
+// 			displayFilterCategories(gCategories);
+// 		} else {
+// 			log("Got error from server loading link categories", "error");
+// 			setMessage("Got error from server loading link categories", false, 20000);
+// 		}
+// 	}
+// 	xhr.onerror = function() {
+// 		log("Could not load link categories from server!", "error");
+// 		setMessage("Could not load link categories from server!", false, 20000);
+// 	}
+
+// 	xhr.send();
+// }
 
 function displayLinkCategories(categories) {
 	let rendered = Mustache.render(gTemplateCategoryDropdown, {categories: categories});
