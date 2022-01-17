@@ -1,60 +1,114 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="./css/fa/font-awesome.min.css">
 	<link rel="stylesheet" href="./css/bootstrap.min.css">
 	<link rel="stylesheet" href="./css/vslinks.css">
 </head>
 <body>
 	<div class="container-fluid" style="min-width: 48em; min-height: 40em;">
 		<div class="navbar navbar-expand-sm bg-dark navbar-dark sticky-top justify-content-between">
-			<ul class="navbar-nav justify-content-end">
+			<a class="navbar-brand" href="#">VS Links</a>
+			<ul data-bind="visible: userData().isLoggedIn()" class="navbar-nav justify-content-end">
                 <li class="nav-item">
-                    <a id="BtnShowCreate" class="nav-link fa fa-plus text-success" href="#" title="New link"></a>
+                    <a data-bind="click: showLinkEdit" class="nav-link fa fa-plus text-success" title="New link"></a>
                 </li>
                 <li class="nav-item">
-					<a id="BtnRefresh" class="nav-link fa fa-refresh text-success" href="#" title="Refresh"></a>
+					<a data-bind="click: loadAllData" class="nav-link fa fa-refresh text-success" title="Refresh"></a>
                 </li>
 				<li class="nav-item">
-					<a id="BtnShowCreateCategory" class="nav-link fa fa-calendar-plus-o text-success" href="#" title="New category"></a>
+					<a data-bind="click: showLinkCategoryEdit" class="nav-link fa fa-calendar-plus-o text-success" title="New category"></a>
 				</li>
 			</ul>
-			<ul id="FilterCategory" class="navbar-nav">
+			<ul data-bind="foreach: linkCategories, visible: userData().isLoggedIn()" id="FilterCategory" class="navbar-nav">
 				<li class="nav-item">
-					<a href="#" class="nav-link fa fa-meh-o text-warning" title="Common"></a>
+					<a data-bind="class: iconClass, attr: {title: name}" class="nav-link text-warning"></a>
 				</li>
 			</ul>
-            <span id="Username" class="navbar-text mr-sm-2">???</span>
+            <span data-bind="text: userData().nick" id="Username" class="navbar-text mr-sm-2">???</span>
         </div>
-		<div id="Msg">...</div>
-		<div class="row" id="New">
-			<div class="row">
-				<div class="col-10 mx-1 my-1"><h5>Create new link</h5></div>
-			</div>
-			<div class="form-group">
-				<select id="CategoryId" class="custom-select custom-select-sm">
-				</select>
-			</div> 
-			<div class="form-group">
-				<input class="form-control form-control-sm" type="text" name="Title" id="Title" placeholder="Title for link" />
-			</div>
-			<div class="form-group">
-				<input class="form-control form-control-sm" type="text" name="Url" id="Url" placeholder="URL" />
-			</div>
-			<div class="form-row">
-				<div class="btn-group">
-					<button class="btn btn-sm btn-primary" id="BtnCreate">Create</button>
-					<button class="btn btn-sm btn-danger" id="BtnCancel">Cancel</button>
-				</div>
-			</div>
+
+		<!-- Error message DIV -->
+		<div data-bind="visible: myErrorMessage().message.length > 0">
+            <div class="alert alert-danger col-4 offset-4 pt-0 pb-0 mt-6">
+                <a data-bind="click: clearErrorMessage" class="close" aria-label="close">&times;</a>
+                <h6 data-bind="text: myErrorMessage().message" class="alert-heading"></h6>
+                <hr>
+                <ul data-bind="foreach: myErrorMessage().errors">
+                    <li data-bind="text: $data" class="small"></li>
+                </ul>
+            </div>
+		</div>
+		
+		<!-- Link list -->
+		<div data-bind="">
+			<table class="table table-bordered table-sm">
+				<tr>
+					<th></th>
+					<th>URL</th>
+					<th>Rating</th>
+					<th>Actions</th>
+				</tr>
+				<tbody data-bind="foreach: links">
+					<tr>
+						<td><i class="{{iconClass}} text-warning"></i></td>
+						<!-- <td data-bind="visible: isEditable, text: title, click: "></td> -->
+						<td>
+							<i class="fa fa-globe"></i>
+							<a data-bind="text: title, attr: {title: url, href: url}" target="_blank"></a>
+						</td>
+						<td>
+							<i data-bind="visible: rating == 0" class="fa fa-question"> </i>
+							<span data-bind="visible: rating != 0, text: rating"></span>
+						</td>
+						<td nowrap>
+							<a data-bind="click: $parent.onVoteUpClicked" class="text-success cursor-pointer"><i class="fa fa-thumbs-o-up"></i></a>
+							<a data-bind="click: $parent.onVoteDownClicked" class="text-dark cursor-pointer"><i class="fa fa-thumbs-o-down"></i></a>
+							<a data-bind="click: $parent.onDeleteLinkClicked" class="vl-btn-delete text-danger cursor-pointer"><i class="fa fa-trash"></i></a>
+							<a data-bind="click: $parent.onEditLinkClicked" class="vl-btn-edit text-dark cursor-pointer"><i class="fa fa-pencil"></i></a>
+						</td>
+					</tr>
+				</tbody>
+				<tr>
+					<td colspan="5" class="text-center">No links in found</td>
+			  	</tr>
+			</table>
 		</div>
 
-		<div class="form-inline my-1" id="NewCategory">
-			<input id="CategoryName" type="text" class="form-control mb-2 mr-sm-2" placeholder="Category name">
-			<div class="btn-group">
-				<button id="BtnCreateCategory" class="btn btn-primary mb-2">Save</button>
-				<button id="BtnCancelCategory" class="btn btn-danger mb-2">Cancel</button>
-			</div>
+		<!-- Create link form -->
+		<div data-bind="visible: componentVisibility.isLinkEditVisible()">
+			<form class="mb-3">
+				<div class="form-row">
+					<div class="col-10 mx-1 my-1"><h5>Create new link</h5></div>
+				</div>
+				<div class="form-row mb-3">
+					<select data-bind="options: linkCategories, value: linkToEdit().linkCategoryId, optionsText: 'name'" class="custom-select custom-select-sm">
+					</select>
+				</div> 
+				<div class="form-row mb-3">
+					<input data-bind="value: linkToEdit().title" class="form-control form-control-sm" type="text" placeholder="Title for link" />
+				</div>
+				<div class="form-row mb-3">
+					<input data-bind="value: linkToEdit().url" class="form-control form-control-sm" type="text" placeholder="URL" />
+				</div>
+				<div class="form-row mb-3">
+					<div class="btn-group">
+						<button data-bind="click: createLink" class="btn btn-sm btn-primary">Create</button>
+						<button data-bind="click: cancelLinkEdit" class="btn btn-sm btn-danger">Cancel</button>
+					</div>
+				</div>
+			</form>
+		</div>
+
+		<!-- Create category form -->
+		<div data-bind="visible: componentVisibility.isLinkCategoryEditVisible()">
+			<form class="form-inline my-1">
+				<input data-bind="value: linkCategoryToEdit().name" type="text" class="form-control form-control-sm mb-2 mr-sm-2" placeholder="Category name">
+				<div class="btn-group">
+					<button data-bind="click: createLinkCategory" class="btn btn-sm btn-primary mb-2">Save</button>
+					<button data-bind="click: cancelLinkCategoryEdit" class="btn btn-sm btn-danger mb-2">Cancel</button>
+				</div>
+			</form>
 		</div>
 
 		<div class="row my-2" id="List"></div>
@@ -64,50 +118,18 @@
 	</div>
 </body>
 
+<script src="./js/knockout-3.5.1.js"></script>
+<script type="text/javascript" src="./js/validator.js"></script>
+<script type="text/javascript" src="./js/loghelper.js"></script>
+<script type="text/javascript" src="./js/models.js"></script>
+<!-- <script src="./js/jwtHelper.js"></script> -->
+<!-- <script src="./js/repository.js"></script> -->
 <script src="./js/mockJwtHelper.js"></script>
 <script src="./js/mockRepository.js"></script>
-<script type="text/javascript" src="./js/popup.js"></script>
-<script type="text/javascript" src="./js/mustache.min.js"></script>
-<script id="template" type="x-tmpl-mustache">
-<table class="table table-bordered table-sm">
-	<tr>
-		<th></th>
-		<th>Title</th>
-		<th>URL</th>
-		<th colspan="2">Actions</th>
-	</tr>
-{{#links}}
-	<tr>
-		<td align="center"><i class="{{iconClass}} text-warning"></i></td>
-		<td>{{title}}</td>
-		<td><a href="{{url}}" target="_blank"><i class="fa fa-globe"></i></td>
-		<td><i class="fa fa-question"> </i></td>
-		<td nowrap>
-			<a href="#" class="text-success" data-uid="{{link_id}}"><i class="fa fa-thumbs-o-up"></i></a>
-			<a href="#" class="text-dark" data-uid="{{link_id}}"><i class="fa fa-thumbs-o-down"></i></a>
-			<a href="#" class="vl-btn-delete text-danger" data-uid="{{link_id}}"><i class="fa fa-trash"></i></a>
-			<a href="#" class="vl-btn-edit text-dark" data-uid="{{link_id}}"><i class="fa fa-pencil"></i></a>
-		</td>
-	</tr>
-{{/links}}
-</table>
+<script type="text/javascript" src="./js/app.js"></script>
+
+<script type="text/javascript">
+	let gXxx = null;
 </script>
-
-<script id="TemplateCategoriesDropdown" type="x-tmpl-mustache">
-	<option for="Title" value="0">Choose type</option>
-	{{#categories}}
-		<option value="{{link_category_id}}">{{name}}</option>
-	{{/categories}}
-</script>
-
-<script id="TemplateFilterCategories" type="x-tmpl-mustache">
-	{{#categories}}
-		<li class="nav-item">
-			<a href="#" data-uid="{{link_category_id}}" class="vl-filter nav-link {{icon_class}} text-warning" title="{{name}}"></a>
-		</li>
-	{{/categories}}
-</script>
-
-
 
 </html>
