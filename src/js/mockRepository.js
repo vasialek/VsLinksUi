@@ -64,7 +64,7 @@ let Repository = {
         }
 
         callback({
-            Jwt: "FakeJwtStringLongEnoughToPassValidation",
+            Jwt: "FakeJwt.WithDots.ToPassValidation",
             Nick: "Mocked user",
             Email: credentials.Email,
             UserId: "1234567890123456789012",
