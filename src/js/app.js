@@ -61,8 +61,12 @@ function AppViewModel() {
         LogHelper.log("Edit link is clicked...");
         console.log(link);
         link.isEditable = true;
-        link.title = "fdsfdsfd";
-        self.links.replace(link, new LinkModel(link));
+                // self.links.replace(link, new LinkModel(link));
+    };
+
+    self.onShareLinkClicked = function(link) {
+        LogHelper.log("Share  link is clicked...");
+        console.log(link);
     };
 
     // Links
