@@ -13,6 +13,10 @@
     white-space: pre-wrap;
 }
 
+#Msg {
+    white-space: pre-wrap;
+}
+
 .hidden {
     display: none;
 }
@@ -59,4 +63,7 @@
     font-size: 1em;
     position: relative;
     content: '*****';
+}
+.cursor-pointer {
+    cursor: pointer;
 }
