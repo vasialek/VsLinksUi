@@ -67,19 +67,22 @@ function AppViewModel() {
     };
 
     self.onEditLinkClicked = function(link) {
-        LogHelper.log("Edit link is clicked...");
-        console.log(link);
+        LogHelper.log(`Edit link is clicked. ${JSON.stringify(link)}`);
         link.isEditable(true);
     };
 
     self.onUpdateLinkClicked = function(link) {
         LogHelper.log("Update link is clicked...");
+        self.updateLink(link);
+    }
+
+    self.updateLink = function(link) {
         LogHelper.log(JSON.stringify(link));
         link.isEditable(false);
-        self.links.replace(link, new LinkModel(link));
-        Repository.updateLink(self.jwt, link, function(link) {
+        self.updateLinkInList(link);
+        Repository.updateLink(self.jwt, link, function (link) {
             LogHelper.log(`Link with ID ${link.link_id} is updated`);
-        }, function(errors) {
+        }, function (errors) {
             self.showErrorMessage("Can't update link on server", errors, 30);
         });
     }
@@ -145,12 +148,11 @@ function AppViewModel() {
     };
 
     self.updateLinkInList = function(linkToUpdate) {
-        // console.log(`Got link to update votes: ${JSON.stringify(linkToUpdate)}`);
         if (linkToUpdate != null) {
             let links = [];
             self.links.removeAll()
                 .forEach(link => {
-                    if (link.linkId == linkToUpdate.linkId) {
+                    if (link.linkId === linkToUpdate.linkId) {
                         links.push(linkToUpdate)
                     } else {
                         links.push(link);
@@ -233,9 +235,32 @@ function AppViewModel() {
         let category = Repository._getLinkCategoryById(linkCategoryId);
         return category.iconClass;
     }
-};
+}
 
 
 let viewModel = new AppViewModel();
+ko.components.register("vs-link-editor", {
+    viewModel: function (params) {
+        let self = this;
+        self.link = params.link || {};
+        this.linkCategories = params.linkCategories;
+        this.title = ko.observable(self.link.title);
+        this.url = ko.observable(self.link.url);
+        this.linkCategoryId = ko.observable(self.link.linkCategoryId);
+
+        this.onUpdateClicked = function () {
+            // console.log(`${JSON.stringify(self.link)}`);
+            self.link.title = self.title();
+            self.link.url = self.url();
+            self.link.linkCategoryId = self.linkCategoryId().linkCategoryId;
+            viewModel.updateLink(self.link);
+        }
+
+        this.onCancelClicked = function () {
+            viewModel.onCancelUpdateLinkClicked(self.link);
+        }
+    },
+    template: {element: "vs-link-editor-template"}
+});
 ko.applyBindings(viewModel);
 viewModel.init();

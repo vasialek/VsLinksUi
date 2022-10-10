@@ -9,6 +9,7 @@
 	<div class="container-fluid" style="min-width: 48em; min-height: 40em;">
 		<div class="navbar navbar-expand-sm bg-dark navbar-dark sticky-top justify-content-between">
 			<a class="navbar-brand" href="#">VS Links</a>
+			<!-- Action buttons -->
 			<ul data-bind="visible: userData().isLoggedIn()" class="navbar-nav justify-content-end">
                 <li class="nav-item">
                     <a data-bind="click: showLinkEdit" class="nav-link fa fa-plus text-success" title="New link"></a>
@@ -62,14 +63,9 @@
 								<i class="fa fa-globe"></i>
 								<a data-bind="text: title, visible: isReadMode(), attr: {title: url, href: url}" target="_blank"></a>
 							</div>
-							<div data-bind="visible: isEditable">
-								<input data-bind="value: title, visible: isEditable" placeholder="Title for link" class="form-control form-control-sm" /><br/>
-								<input data-bind="value: url, visible: isEditable" placeholder="URL for link" class="form-control form-control-sm" /><br/>
-								<div class="btn-group">
-									<a data-bind="click: $parent.onUpdateLinkClicked" class="btn btn-primary btn-sm">Update</a>
-									<a data-bind="click: $parent.onCancelUpdateLinkClicked" class="btn btn-danger btn-sm">Cancel</a>
-								</div>
-							</div>
+							<!-- Link editor -->
+
+								<vs-link-editor data-bind="visible: isEditable" params="link: $data, linkCategories: $parent.linkCategories"></vs-link-editor>
 						</td>
 						<td>
 							<i data-bind="visible: rating == 0" class="fa fa-question"> </i>
@@ -133,6 +129,20 @@
         </div>
 	</div>
 </body>
+
+
+<template id="vs-link-editor-template">
+	<div>
+		<select data-bind="options: linkCategories, value: linkCategoryId, optionsText: 'name'" class="form-control form-control-sm"></select><br/>
+		<input data-bind="value: title" placeholder="Title for link" class="form-control form-control-sm" /><br/>
+		<input data-bind="value: url" placeholder="URL for link" class="form-control form-control-sm" /><br/>
+		<div class="btn-group">
+			<a data-bind="click: onUpdateClicked" class="btn btn-primary btn-sm">Update</a>
+			<a data-bind="click: onCancelClicked" class="btn btn-danger btn-sm">Cancel</a>
+		</div>
+	</div>
+</template>
+
 
 <script src="./js/knockout-3.5.1.js"></script>
 <script type="text/javascript" src="./js/validator.js"></script>
