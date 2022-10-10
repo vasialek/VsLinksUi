@@ -42,6 +42,10 @@ function AppViewModel() {
         self.loadLinks(null);
     };
 
+    self.onTestClicked = function() {
+        LogHelper.log("TEST clicked...");
+    };
+
     // Event handlers
     self.onFilterCategoryClicked = function(linkCategory) {
         // console.log(linkCategory);
@@ -70,7 +74,7 @@ function AppViewModel() {
 
     self.onUpdateLinkClicked = function(link) {
         LogHelper.log("Update link is clicked...");
-        console.log(link);
+        LogHelper.log(JSON.stringify(link));
         link.isEditable(false);
         self.links.replace(link, new LinkModel(link));
         Repository.updateLink(self.jwt, link, function(link) {
@@ -78,6 +82,11 @@ function AppViewModel() {
         }, function(errors) {
             self.showErrorMessage("Can't update link on server", errors, 30);
         });
+    }
+
+    self.onCancelUpdateLinkClicked = function(link) {
+        LogHelper.log("Cancel link is clicked");
+        link.isEditable(false);
     }
 
     // Links
@@ -92,7 +101,7 @@ function AppViewModel() {
             console.table(links);
             let ar = [];
             links.forEach(link => {
-                ar.push(new LinkModel(link));
+                ar.push(link);
             });
             self.links(ar);
         }, function(errors) {
@@ -127,53 +136,39 @@ function AppViewModel() {
     };
 
     self.voteLink = function(linkToUpdate, vote) {
-        console.log("voteLink: linkId: " + linkToUpdate.linkId);
+        LogHelper.log("voteLink: linkId: " + linkToUpdate.linkId);
         Repository.voteLink(self.jwt, linkToUpdate.linkId, vote, function(link) {
-            console.log("Link was voted OK:");
-            console.log(link);
-            self.links.replace(linkToUpdate, new LinkModel(link));
-            // self.updateLinkInList(link);
+            self.updateLinkInList(link);
         }, function(errors) {
             self.showErrorMessage("Error voting for link.", errors, 30);
         });
     };
 
-    self.updateLinkInList = function(link) {
-        let linkToUpdate = self._getLinkById(link.linkId);
-        console.log("Got link to update votes:");
-        console.log(linkToUpdate);
+    self.updateLinkInList = function(linkToUpdate) {
+        // console.log(`Got link to update votes: ${JSON.stringify(linkToUpdate)}`);
         if (linkToUpdate != null) {
-            self.links.replace(linkToUpdate, link);
-        }
-        // let index = self.links.indexOf(link);
-        // self.links.replace(self.links[index], {
-        //     linkId: link.linkId,
-        //     title: link.title,
-        //     rating: link.rating,
-        // });
-        // self.links.splice(index, 1);
-        // self.links.splice(index, 0, link);
-    };
+            let links = [];
+            self.links.removeAll()
+                .forEach(link => {
+                    if (link.linkId == linkToUpdate.linkId) {
+                        links.push(linkToUpdate)
+                    } else {
+                        links.push(link);
+                    }
+                });
+            self.links(links);
 
-    self._getLinkById = function(linkId) {
-        console.log("Link ID to find: " + linkId);
-        let ar = self.links();
-        ar.forEach(link => {
-            if (link.linkId == linkId) {
-                return link;
-            }
-        });
-        return null;
+        }
     };
 
     // Link Categories
     self.loadLinkCategories = function() {
         Repository.loadCategories(self.jwt, function (categories) {
-            console.log("Got link categories from server...");
-            console.log(categories);
+            LogHelper.log("Got link categories from server...");
+            LogHelper.log(JSON.stringify(categories));
             let ar = [];
             categories.forEach(category => {
-                ar.push(new LinkCategoryModel(category));
+                ar.push(category);
             });
             self.linkCategories(ar);
         }, function (errors) {
@@ -184,17 +179,15 @@ function AppViewModel() {
     self.createLinkCategory = function() {
         console.log("Create link category:");
         console.log(self.linkCategoryToEdit());
-        // self.showErrorMessage("dfdsfdsf", [], 20);
         let category = {
             name: self.linkCategoryToEdit().name
         };
         Repository.createCategory(self.jwt, category, function(category) {
-            console.log("Category is created:");
-            console.log(category);
+            LogHelper.log(`Category is created: ${JSON.stringify(category)}`);
             let ar = self.linkCategories();
-            console.log(ar);
+            // console.log(ar);
             ar.push(new LinkCategoryModel(category));
-            console.log(ar);
+            // console.log(ar);
             self.linkCategories(ar);
         }, function(errors) {
             self.showErrorMessage("Error creating link category.", errors, 20);
@@ -233,12 +226,12 @@ function AppViewModel() {
 
     self.getIconClass = function(linkCategoryId, additionalCssClass = '') {
         let category = Repository._getLinkCategoryById(linkCategoryId);
-        return `${category.icon_class} ${additionalCssClass}`;
+        return category == null ? additionalCssClass : `${category.iconClass} ${additionalCssClass}`;
     }
 
     self.getIconText = function(linkCategoryId) {
         let category = Repository._getLinkCategoryById(linkCategoryId);
-        return category.icon_class;
+        return category.iconClass;
     }
 };
 

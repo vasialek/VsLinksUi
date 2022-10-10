@@ -19,7 +19,11 @@
 				<li class="nav-item">
 					<a data-bind="click: showLinkCategoryEdit" class="nav-link fa fa-calendar-plus-o text-success" title="New category"></a>
 				</li>
+				<li class="nav-item">
+					<a data-bind="click: onTestClicked" class="nav-link fa fa-bug text-danger" title="TEST"></a>
+				</li>
 			</ul>
+			<!-- List of link categories -->
 			<ul data-bind="foreach: linkCategories, visible: userData().isLoggedIn()" id="FilterCategory" class="navbar-nav">
 				<li class="nav-item">
 					<a data-bind="click: $parent.onFilterCategoryClicked, class: iconClass, attr: {title: name}" class="nav-link text-warning cursor-pointer"></a>
