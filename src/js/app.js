@@ -101,7 +101,6 @@ function AppViewModel() {
         }
 
         Repository.loadLinks(self.jwt, linkCategoryId, function(links) {
-            console.table(links);
             let ar = [];
             links.forEach(link => {
                 ar.push(link);
@@ -225,16 +224,6 @@ function AppViewModel() {
     self.clearErrorMessage = function() {
         self.myErrorMessage(new ErrorMessage("", []));
     };
-
-    self.getIconClass = function(linkCategoryId, additionalCssClass = '') {
-        let category = Repository._getLinkCategoryById(linkCategoryId);
-        return category == null ? additionalCssClass : `${category.iconClass} ${additionalCssClass}`;
-    }
-
-    self.getIconText = function(linkCategoryId) {
-        let category = Repository._getLinkCategoryById(linkCategoryId);
-        return category.iconClass;
-    }
 }
 
 
@@ -262,5 +251,14 @@ ko.components.register("vs-link-editor", {
     },
     template: {element: "vs-link-editor-template"}
 });
+
+let options = {
+    attribute: "data-bind",        // default "data-sbind"
+    globals: window,               // default {}
+    bindings: ko.bindingHandlers,  // default ko.bindingHandlers
+    noVirtualElements: false       // default true
+};
+ko.bindingProvider.instance = new ko.secureBindingsProvider(options);
+
 ko.applyBindings(viewModel);
 viewModel.init();

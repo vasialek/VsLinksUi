@@ -31,12 +31,6 @@ class LinkModel {
             return self.isEditable() == false;
         });
     }
-    // getIconClass () {
-    //     return this.icon
-    // };
-    // getIconText() {
-    //     return "fdsfsdf";
-    // }
 }
 
 class LinkCategoryModel {

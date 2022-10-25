@@ -27,7 +27,7 @@
 			<!-- List of link categories -->
 			<ul data-bind="foreach: linkCategories, visible: userData().isLoggedIn()" id="FilterCategory" class="navbar-nav">
 				<li class="nav-item">
-					<a data-bind="click: $parent.onFilterCategoryClicked, class: iconClass, attr: {title: name}" class="nav-link text-warning cursor-pointer"></a>
+					<a data-bind="click: $parent.onFilterCategoryClicked, attr: {title: name}" class="nav-link text-warning cursor-pointer"><i data-bind="attr: {class: iconClass}"></i></a>
 				</li>
 			</ul>
             <span data-bind="text: userData().nick" id="Username" class="navbar-text mr-sm-2">???</span>
@@ -56,19 +56,18 @@
 				</tr>
 				<tbody data-bind="foreach: links">
 					<tr>
-						<td><i data-bind="attr: {class: $parent.getIconClass(linkCategoryId, 'text-warning'), title: $parent.getIconText(linkCategoryId)}" class="text-warning"></i></td>
-						<!-- <td data-bind="visible: isEditable, text: title, click: "></td> -->
+						<td><i data-bind="attr: {class: iconClass}"></i></td>
+<!--						<td><i data-bind="attr: {class: $parent.getIconClass(linkCategoryId, 'text-warning'), title: $parent.getIconText(linkCategoryId)}" class="text-warning"></i></td>-->
 						<td>
 							<div data-bind="visible: isReadMode()">
 								<i class="fa fa-globe"></i>
 								<a data-bind="text: title, visible: isReadMode(), attr: {title: url, href: url}" target="_blank"></a>
 							</div>
 							<!-- Link editor -->
-
 								<vs-link-editor data-bind="visible: isEditable" params="link: $data, linkCategories: $parent.linkCategories"></vs-link-editor>
 						</td>
 						<td>
-							<i data-bind="visible: rating == 0" class="fa fa-question"> </i>
+							<i data-bind="visible: rating == ''" class="fa fa-question"> </i>
 							<span data-bind="visible: rating != 0, text: rating"></span>
 						</td>
 						<td nowrap>
@@ -145,6 +144,7 @@
 
 
 <script src="./js/knockout-3.5.1.js"></script>
+<script src="./js/knockout-secure-binding.min.js"></script>
 <script type="text/javascript" src="./js/validator.js"></script>
 <script type="text/javascript" src="./js/loghelper.js"></script>
 <script type="text/javascript" src="./js/models.js"></script>

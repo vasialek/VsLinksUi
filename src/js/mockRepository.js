@@ -5,17 +5,17 @@ let Repository = {
         new LinkCategoryModel({
             name: "Fake category 1",
             link_category_id: "38f4f9d5f12a416193a6c22a56d9c142",
-            icon_class: "fa fa-plus",
+            icon_class: "fa fa-plus text-primary",
         }),
         new LinkCategoryModel({
             name: "Fake category 2",
             link_category_id: "6ea6ac0db8114f17ba717145e0990ce7",
-            icon_class: "fa fa-credit-card",
+            icon_class: "fa fa-credit-card text-warning",
         }),
         new LinkCategoryModel({
             name: "Fake category 3",
             link_category_id: "74bbe5264219493688c75f4cd90b2cf4",
-            icon_class: "fa fa-circle",
+            icon_class: "fa fa-circle text-secondary",
         })
     ],
     links: [
@@ -25,7 +25,7 @@ let Repository = {
             user_id: "99d45738976d4a64acee1356e49044f4",
             title: "Link in category 1",
             url: "http://www.google.com",
-            rating: 0,
+            rating: 0
         }),
         new LinkModel({
             link_id: "77f83c82b7aa46debdf6c7feea95c2b3",
@@ -33,7 +33,7 @@ let Repository = {
             user_id: "99d45738976d4a64acee1356e49044f4",
             title: "Link in category 1",
             url: "http://www.google.com",
-            rating: 0,
+            rating: 0
         }),
         new LinkModel({
             link_id: "74270b454331414a953f809bcb63c01a",
@@ -41,7 +41,7 @@ let Repository = {
             user_id: "99d45738976d4a64acee1356e49044f4",
             title: "Link in category 2",
             url: "http://www.google.com",
-            rating: -1,
+            rating: -1
         }),
         new LinkModel({
             link_id: "5deddfaf1804489fb52f437bfb656765",
@@ -49,7 +49,7 @@ let Repository = {
             user_id: "99d45738976d4a64acee1356e49044f4",
             title: "Link in category 3",
             url: "http://www.google.com",
-            rating: 2,
+            rating: 2
         })
     ],
 
@@ -68,7 +68,7 @@ let Repository = {
     },
 
     loadCategories: function(jwt, callback, errorCallback) {
-        if (JwtHelper.isValid(jwt) == false) {
+        if (JwtHelper.isValid(jwt) === false) {
             errorCallback(["You are not logged in"]);
             return;
         }
@@ -77,7 +77,7 @@ let Repository = {
     },
 
     createCategory: function(jwt, category, callback, errorCallback) {
-        if (JwtHelper.isValid(jwt) == false) {
+        if (JwtHelper.isValid(jwt) === false) {
             errorCallback(["You are not logged in, please re-login."]);
             return;
         }
@@ -96,7 +96,7 @@ let Repository = {
     },
 
     loadLinks: function(jwt, linkCategoryId, callback, errorCallback) {
-        if (JwtHelper.isValid(jwt) == false) {
+        if (JwtHelper.isValid(jwt) === false) {
             errorCallback(["You are not logged in, please re-login."]);
             return;
         }
@@ -105,7 +105,7 @@ let Repository = {
         if (linkCategoryId !== null) {
             ar = [];
             this.links.forEach(link => {
-                if (link.linkCategoryId == linkCategoryId) {
+                if (link.linkCategoryId === linkCategoryId) {
                     ar.push(link);
                 }
             });
@@ -113,7 +113,6 @@ let Repository = {
 
         for (let i = 0; i < ar.length; i++) {
             const linkCategory = this._getLinkCategoryById(ar[i].linkCategoryId);
-            console.log(linkCategory);
             if (linkCategory !== null) {
                 // console.log("linkCategory.icon_class: " + linkCategory.icon_class);
                 ar[i].iconClass = linkCategory.iconClass;
@@ -124,7 +123,7 @@ let Repository = {
     },
 
     createLink: function(jwt, link, callback, errorCallback) {
-        if (JwtHelper.isValid(jwt) == false) {
+        if (JwtHelper.isValid(jwt) === false) {
             errorCallback(["You are not logged in, please re-login."]);
             return;
         }
@@ -150,7 +149,7 @@ let Repository = {
         }
 
         for (let i = 0; i < this.links.length; i++) {
-            if (this.links[i].link_id == linkId) {
+            if (this.links[i].link_id === linkId) {
                 let link = this.links[i];
                 this.links.splice(i);
                 callback(link);
@@ -162,7 +161,7 @@ let Repository = {
     },
 
     voteLink: function(jwt, linkId, vote, callback, errorCallback) {
-        if (JwtHelper.isValid(jwt) == false) {
+        if (JwtHelper.isValid(jwt) === false) {
             errorCallback(["You are not logged in, please re-login."]);
             return;
         }
@@ -209,7 +208,7 @@ let Repository = {
 
     _getLinkById: function(linkId) {
         for (let i = 0; i < this.links.length; i++) {
-            if (this.links[i].linkId == linkId) {
+            if (this.links[i].linkId === linkId) {
                 return this.links[i];
             }
         }
@@ -218,7 +217,7 @@ let Repository = {
 
     _getLinkCategoryById: function(linkCategoryId) {
         for (let i = 0; i < this.link_categories.length; i++) {
-            if (this.link_categories[i].linkCategoryId == linkCategoryId) {
+            if (this.link_categories[i].linkCategoryId === linkCategoryId) {
                 return this.link_categories[i];
             }
         }

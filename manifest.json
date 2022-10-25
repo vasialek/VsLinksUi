@@ -1,6 +1,6 @@
 {
   "name": "VsLinksUi",
-  "version": "0.7.11",
+  "version": "0.8.2",
   "manifest_version": 2,
   "description": "Browser extension for VsLinks UI",
   "homepage_url": "https://vslinks.herokuapp.com/",
