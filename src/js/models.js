@@ -25,7 +25,7 @@ class LinkModel {
         this.title = link.title;
         this.url = link.url;
         this.rating = link.rating;
-        this.iconClass = link.icon_class;
+        this.iconClass = ""; //link.icon_class;
         this.isEditable = ko.observable(false);
         this.isReadMode = ko.computed(function() {
             return self.isEditable() == false;

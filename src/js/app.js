@@ -44,6 +44,14 @@ function AppViewModel() {
 
     self.onTestClicked = function() {
         LogHelper.log("TEST clicked...");
+        new LinkRepository().loadLinks(self.jwt, null, function (links) {
+            console.table(links);
+            let ar = [];
+            links.forEach(link => ar.push(link));
+            self.links(ar);
+        }, function (errors) {
+            self.showErrorMessage("Failed to load links", errors, 20);
+        })
     };
 
     // Event handlers
@@ -164,13 +172,11 @@ function AppViewModel() {
 
     // Link Categories
     self.loadLinkCategories = function() {
-        Repository.loadCategories(self.jwt, function (categories) {
+        new LinkCategoryRepository().loadCategories(self.jwt, function (categories) {
             LogHelper.log("Got link categories from server...");
-            LogHelper.log(JSON.stringify(categories));
+            // LogHelper.log(JSON.stringify(categories));
             let ar = [];
-            categories.forEach(category => {
-                ar.push(category);
-            });
+            categories.forEach(category => ar.push(category));
             self.linkCategories(ar);
         }, function (errors) {
             self.showErrorMessage("Got error from server loading link categories", errors, 20);
